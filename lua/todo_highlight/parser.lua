@@ -22,48 +22,51 @@ function M.parse_buffer(bufnr, keywords)
   end)
   
   for idx, line in ipairs(lines) do
-    local line_items = {}
     local search_start = 1
+    local line_matches = {}
 
+    -- Step 1: Find all potential matches and their positions first.
     while true do
-      local earliest_match = nil
-
-      -- Find the keyword that appears earliest in the rest of the line
+      local best_match = nil
       for _, keyword in ipairs(sorted_keywords) do
-        local pattern = "%f[%w]" .. keyword .. "%f[%W]"
-        local start_pos, end_pos = line:find(pattern, search_start)
-
+        local start_pos, end_pos = line:find(keyword, search_start, true) -- plain find
         if start_pos then
-          if not earliest_match or start_pos < earliest_match.start_pos then
-            earliest_match = {
-              keyword = keyword,
-              start_pos = start_pos,
-              end_pos = end_pos,
-            }
+          -- Check boundaries manually
+          local char_before = start_pos == 1 and " " or line:sub(start_pos - 1, start_pos - 1)
+          local char_after = end_pos == #line and " " or line:sub(end_pos + 1, end_pos + 1)
+
+          if not char_before:match("%w") and not char_after:match("%w") then
+            -- This is a valid whole-word match. See if it's the earliest one.
+            if not best_match or start_pos < best_match.start_pos then
+              best_match = {
+                keyword = keyword,
+                start_pos = start_pos,
+                end_pos = end_pos,
+              }
+            end
           end
         end
       end
 
-      if earliest_match then
-        table.insert(line_items, earliest_match)
-        search_start = earliest_match.end_pos + 1
+      if best_match then
+        table.insert(line_matches, best_match)
+        search_start = best_match.end_pos + 1
       else
-        break -- No more matches on this line
+        break -- No more matches found on this line
       end
     end
 
-    -- Now process the found items on the line to correctly extract descriptions
-    for i, match in ipairs(line_items) do
-      local text_end
-      if i < #line_items then
-        -- The description ends where the next keyword starts
-        text_end = line_items[i + 1].start_pos - 1
+    -- Step 2: Process the collected matches to extract descriptions correctly.
+    for i, match in ipairs(line_matches) do
+      local text_end_pos
+      if i < #line_matches then
+        text_end_pos = line_matches[i + 1].start_pos - 1
       else
-        -- It's the last keyword, description goes to end of line
-        text_end = #line
+        text_end_pos = #line
       end
 
-      local after_keyword = line:sub(match.end_pos + 1, text_end)
+      local text_start_pos = match.end_pos + 1
+      local after_keyword = line:sub(text_start_pos, text_end_pos)
       local desc = vim.trim(after_keyword:gsub("^%s*:?%s*", ""))
 
       table.insert(items, {

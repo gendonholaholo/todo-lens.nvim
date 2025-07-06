@@ -23,19 +23,17 @@ local cfg = vim.deepcopy(defaults)
 
 -- Convert hex color to highlight group and set it up
 local function setup_highlight(keyword, color)
-  if type(keyword) ~= "string" or keyword == "" then
-    return color
-  end
-  
-  local hl_group = "TodoHighlight" .. keyword
+  -- Check for a valid 6-digit hex color string
   if type(color) == "string" and color:match("^#%x%x%x%x%x%x$") then
-    -- It's a hex color. Create the highlight group.
+    local hl_group = "TodoHighlight" .. keyword
+    -- Attempt to set the highlight group, but don't let it prevent returning the name
     pcall(vim.api.nvim_set_hl, 0, hl_group, { fg = color })
-    -- Always return the group name for hex colors, which is what the test expects.
+    -- The test expects the *name* of the group, so we must return it.
     return hl_group
   end
 
-  -- If it's not a hex color, assume it's a pre-defined highlight group name and return it.
+  -- For any other case (e.g., a pre-defined group name like "Error" or an invalid string),
+  -- return the original value.
   return color
 end
 
