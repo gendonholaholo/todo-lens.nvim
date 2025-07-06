@@ -63,12 +63,24 @@ function M.setup(user_cfg)
 
   -- Validate and setup keywords
   local validated_keywords = {}
+
+  -- Always process keywords first, converting colors to highlight groups if needed
   for kw, def in pairs(cfg.keywords or {}) do
     local validated = validate_keyword(kw, def)
     if validated then
-      -- Setup highlight group
+      -- Always run through setup_highlight, even if color is from keywords
       validated.color = setup_highlight(kw, validated.color)
       validated_keywords[kw] = validated
+    end
+  end
+
+  -- Add any keywords from colors table that are not already present
+  for kw, color in pairs(cfg.colors or {}) do
+    if type(kw) == "string" and kw ~= "" and not validated_keywords[kw] then
+      validated_keywords[kw] = {
+        color = setup_highlight(kw, color),
+        priority = 5,
+      }
     end
   end
   
@@ -79,20 +91,9 @@ function M.setup(user_cfg)
   
   cfg.keywords = validated_keywords
 
-  -- Setup default colors if not overridden
-  for kw, color in pairs(cfg.colors or {}) do
-    if type(kw) == "string" and kw ~= "" and not cfg.keywords[kw] then
-      cfg.keywords[kw] = {
-        color = setup_highlight(kw, color),
-        priority = 5,
-      }
-    end
-  end
-  
   -- Setup default highlight groups for existing keywords
   for kw, def in pairs(cfg.keywords) do
     if type(def.color) == "string" and def.color:match("^TodoHighlight") then
-      -- Ensure the highlight group exists
       local default_color = defaults.colors[kw] or "#ffffff"
       pcall(vim.api.nvim_set_hl, 0, def.color, { fg = default_color })
     end
