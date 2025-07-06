@@ -20,16 +20,23 @@ A lightweight, high-performance Neovim plugin for highlighting and managing TODO
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
-  "gendonholaholo/todo-lens.nvim",
+  "Gos/todo-lens.nvim",
   event = { "BufReadPost", "BufNewFile" },
   config = function()
     require("todo_lens").setup({
       -- optional custom config
       keywords = {
-        TODO  = { color = "#ff9e64", priority = 10 },
+        TODO  = { color = "#ff9e64", priority = 10 }, -- hex colors automatically create highlight groups
         FIXME = { color = "#e86671", priority = 10 },
         HACK  = { color = "#bb9af7", priority = 5  },
         NOTE  = { color = "#7dcfff", priority = 1  },
+      },
+      -- or use highlight groups
+      keywords = {
+        TODO  = { color = "TodoHighlightTODO", priority = 10 }, -- link to existing highlight group
+        FIXME = { color = "Error", priority = 10 },             -- link to builtin group
+        HACK  = { color = "WarningMsg", priority = 5 },
+        NOTE  = { color = "Comment", priority = 1 },
       },
     })
   end,
@@ -39,7 +46,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
 use({
-  "gendonholaholo/todo-lens.nvim",
+  "Gos/todo-lens.nvim",
   config = function()
     require("todo_lens").setup()
   end,
@@ -48,7 +55,7 @@ use({
 
 Using [vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
-Plug 'gendonholaholo/todo-lens.nvim'
+Plug 'Gos/todo-lens.nvim'
 ```
 
 ## Usage
@@ -77,6 +84,12 @@ require("todo_lens").setup({
     HACK  = { color = "TodoHighlightHACK",  priority = 5  },
     NOTE  = { color = "TodoHighlightNOTE",  priority = 1  },
   },
+  colors = {
+    TODO  = "#ff9e64",  -- default colors if no keyword override
+    FIXME = "#e86671",
+    HACK  = "#bb9af7",
+    NOTE  = "#7dcfff",
+  },
   highlight = {
     keyword = "fg",        -- options: "fg" | "bg" | "none"
     after_keyword = "comment", -- "comment" to link to Comment group
@@ -89,9 +102,9 @@ Add your own keywords with custom colors and priorities:
 ```lua
 require("todo_lens").setup({
   keywords = {
-    BUG   = { color = "#ff0000", priority = 20 },
-    PERF  = { color = "#ffff00", priority = 15 },
-    TEST  = { color = "#00ff00", priority = 5  },
+    BUG   = { color = "#ff0000", priority = 20 },  -- hex color
+    PERF  = { color = "Special", priority = 15 },   -- highlight group
+    TEST  = { color = "Function", priority = 5  },  -- highlight group
   },
 })
 ```
