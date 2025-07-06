@@ -4,6 +4,11 @@ local M = {}
 ---@param keywords table<string, {priority:number}>
 ---@return table[]
 function M.parse_buffer(bufnr, keywords)
+  -- Gracefully handle invalid buffer numbers (e.g. test passes 9999)
+  if type(bufnr) ~= "number" or not vim.api.nvim_buf_is_valid(bufnr) then
+    return {}
+  end
+  
   local items = {}
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
   
