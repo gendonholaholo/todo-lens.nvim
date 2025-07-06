@@ -1,6 +1,8 @@
 -- Minimal init.lua for testing
 local function add_pack(name)
-  local install_path = vim.fn.stdpath("data") .. "/site/pack/deps/start/" .. name
+  -- Handle headless mode properly
+  local data_path = vim.fn.has("nvim-0.8") == 1 and vim.fn.stdpath("data") or vim.fn.expand("~/.local/share/nvim")
+  local install_path = data_path .. "/site/pack/deps/start/" .. name
   if vim.fn.isdirectory(install_path) == 0 then
     return false
   end
@@ -12,8 +14,8 @@ end
 vim.opt.runtimepath:prepend(".")
 
 -- Add test dependencies (optional)
-local has_plenary = add_pack("plenary.nvim")
-local has_telescope = add_pack("telescope.nvim")
+local has_plenary = pcall(add_pack, "plenary.nvim")
+local has_telescope = pcall(add_pack, "telescope.nvim")
 
 -- Mock telescope if not available
 if not has_telescope then
@@ -34,13 +36,31 @@ vim.opt.writebackup = false
 
 -- Set up basic configuration
 vim.g.mapleader = " "
-vim.opt.termguicolors = true
+if vim.fn.has("gui_running") == 0 then
+  vim.opt.termguicolors = true
+end
 
 -- Ensure highlight groups exist for testing
-vim.api.nvim_set_hl(0, "TodoHighlightTODO", { fg = "#ff9e64" })
-vim.api.nvim_set_hl(0, "TodoHighlightFIXME", { fg = "#e86671" })
-vim.api.nvim_set_hl(0, "TodoHighlightHACK", { fg = "#bb9af7" })
-vim.api.nvim_set_hl(0, "TodoHighlightNOTE", { fg = "#7dcfff" })
+local function setup_highlights()
+  local highlights = {
+    TodoHighlightTODO = { fg = "#ff9e64" },
+    TodoHighlightFIXME = { fg = "#e86671" },
+    TodoHighlightHACK = { fg = "#bb9af7" },
+    TodoHighlightNOTE = { fg = "#7dcfff" },
+  }
+  
+  for group, opts in pairs(highlights) do
+    pcall(vim.api.nvim_set_hl, 0, group, opts)
+  end
+end
+
+setup_highlights()
 
 -- Suppress startup messages
-vim.opt.shortmess:append("I") 
+vim.opt.shortmess:append("I")
+
+-- Ensure we have a proper test environment
+if vim.fn.argc() == 0 then
+  -- Create a test buffer if no arguments
+  vim.cmd("enew")
+end 

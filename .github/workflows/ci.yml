@@ -38,12 +38,20 @@ jobs:
     - name: Setup test environment
       run: |
         mkdir -p ~/.local/share/nvim/site/pack/deps/start
+        mkdir -p ~/.cache/nvim
         # Create minimal test dependencies
         mkdir -p tests/deps
         echo "-- Mock plenary for testing" > tests/deps/plenary.lua
+        # Set up proper XDG directories for headless mode
+        export XDG_DATA_HOME="$HOME/.local/share"
+        export XDG_CONFIG_HOME="$HOME/.config"
+        export XDG_CACHE_HOME="$HOME/.cache"
 
     - name: Run tests
       run: |
+        export XDG_DATA_HOME="$HOME/.local/share"
+        export XDG_CONFIG_HOME="$HOME/.config"
+        export XDG_CACHE_HOME="$HOME/.cache"
         busted --verbose --output=gtest
       continue-on-error: false
 
