@@ -57,7 +57,7 @@ jobs:
         export XDG_DATA_HOME="$HOME/.local/share"
         export XDG_CONFIG_HOME="$HOME/.config"
         export XDG_CACHE_HOME="$HOME/.cache"
-        vusted -u tests/minimal_init.lua tests
+        vusted tests
       continue-on-error: false
 
     - name: Upload test results
