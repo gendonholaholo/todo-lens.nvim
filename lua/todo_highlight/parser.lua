@@ -23,26 +23,28 @@ function M.parse_buffer(bufnr, keywords)
   
   for idx, line in ipairs(lines) do
     for _, keyword in ipairs(sorted_keywords) do
-      -- Look for keyword with word boundaries
+      -- Pattern with word boundaries
       local pattern = "%f[%w]" .. keyword .. "%f[%W]"
-      local start_pos, end_pos = line:find(pattern)
-      
-      if start_pos then
-        -- Extract description after keyword
+      local search_start = 1
+      while true do
+        local start_pos, end_pos = line:find(pattern, search_start)
+        if not start_pos then
+          break
+        end
+
         local after_keyword = line:sub(end_pos + 1)
         local desc = vim.trim(after_keyword:gsub("^%s*:?%s*", ""))
-        
+
         table.insert(items, {
           bufnr = bufnr,
           lnum = idx,
-          col = start_pos - 1, -- 0-based for highlighting
+          col = start_pos - 1,
           keyword = keyword,
           text = desc,
           priority = keywords[keyword] and keywords[keyword].priority or 0,
         })
-        
-        -- Only match first keyword per line
-        break
+
+        search_start = end_pos + 1 -- continue searching after this keyword
       end
     end
   end

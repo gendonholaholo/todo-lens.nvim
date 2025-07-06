@@ -34,12 +34,6 @@ local function setup_highlight(keyword, color)
     if ok then
       return hl_group
     end
-  elseif type(color) == "string" and color ~= "" then
-    -- It's a highlight group name, link to it
-    local ok, _ = pcall(vim.api.nvim_set_hl, 0, hl_group, { link = color })
-    if ok then
-      return hl_group
-    end
   end
   return color
 end
