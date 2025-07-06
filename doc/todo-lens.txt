@@ -1,0 +1,120 @@
+*todo-lens.txt*    Lightweight TODO comment highlighter for Neovim
+
+==============================================================================
+CONTENTS                                                   *todo-lens-contents*
+
+1. Introduction                                         |todo-lens-introduction|
+2. Installation                                         |todo-lens-installation|
+3. Configuration                                       |todo-lens-configuration|
+4. Commands                                                 |todo-lens-commands|
+5. API                                                           |todo-lens-api|
+6. Highlights                                             |todo-lens-highlights|
+
+==============================================================================
+1. INTRODUCTION                                        *todo-lens-introduction*
+
+todo-lens.nvim is a lightweight, high-performance Neovim plugin for 
+highlighting and managing TODO-style comments with advanced listing 
+capabilities.
+
+Features:
+- Real-time highlighting of TODO, FIXME, HACK, NOTE comments
+- Quickfix list integration for easy navigation
+- Telescope integration for fuzzy searching
+- Highly configurable keywords and colors
+- Optimized for performance with incremental updates
+
+==============================================================================
+2. INSTALLATION                                        *todo-lens-installation*
+
+Using lazy.nvim: >
+    {
+      "Gos/todo-lens.nvim",
+      event = { "BufReadPost", "BufNewFile" },
+      config = function()
+        require("todo_lens").setup()
+      end,
+    }
+<
+
+Using packer.nvim: >
+    use({
+      "Gos/todo-lens.nvim",
+      config = function()
+        require("todo_lens").setup()
+      end,
+    })
+<
+
+==============================================================================
+3. CONFIGURATION                                       *todo-lens-configuration*
+
+Default configuration: >
+    require("todo_lens").setup({
+      keywords = {
+        TODO  = { color = "TodoHighlightTODO",  priority = 10 },
+        FIXME = { color = "TodoHighlightFIXME", priority = 10 },
+        HACK  = { color = "TodoHighlightHACK",  priority = 5  },
+        NOTE  = { color = "TodoHighlightNOTE",  priority = 1  },
+      },
+      colors = {
+        TODO  = "#ff9e64",
+        FIXME = "#e86671",
+        HACK  = "#bb9af7",
+        NOTE  = "#7dcfff",
+      },
+      highlight = {
+        keyword = "fg",
+        after_keyword = "comment",
+      },
+    })
+<
+
+==============================================================================
+4. COMMANDS                                                 *todo-lens-commands*
+
+                                                                    *:TodoList*
+:TodoList               Open quickfix window with all TODO items from open
+                        buffers.
+
+                                                                  *:TodoToggle*
+:TodoToggle             Toggle TODO comment highlighting on/off.
+
+                                                                *:TodoTelescope*
+:TodoTelescope          Open Telescope picker for fuzzy searching TODO items.
+                        Requires telescope.nvim to be installed.
+
+==============================================================================
+5. API                                                           *todo-lens-api*
+
+                                                            *todo_lens.setup()*
+todo_lens.setup({config})
+    Setup the plugin with optional configuration.
+
+                                                            *todo_lens.toggle()*
+todo_lens.toggle()
+    Toggle TODO highlighting on/off.
+
+                                                              *todo_lens.list()*
+todo_lens.list()
+    Populate quickfix list with TODO items.
+
+                                                   *todo_lens.highlight_buffer()*
+todo_lens.highlight_buffer({bufnr})
+    Highlight TODO items in the specified buffer.
+
+==============================================================================
+6. HIGHLIGHTS                                             *todo-lens-highlights*
+
+The plugin creates the following highlight groups:
+
+TodoHighlightTODO       Default highlight for TODO keywords
+TodoHighlightFIXME      Default highlight for FIXME keywords  
+TodoHighlightHACK       Default highlight for HACK keywords
+TodoHighlightNOTE       Default highlight for NOTE keywords
+
+You can customize these by setting your own highlight groups or by using
+hex colors in the configuration.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl: 
