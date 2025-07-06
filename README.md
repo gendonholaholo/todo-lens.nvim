@@ -20,7 +20,7 @@ A lightweight, high-performance Neovim plugin for highlighting and managing TODO
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
-  "Gos/todo-lens.nvim",
+  "gendonholaholo/todo-lens.nvim",
   event = { "BufReadPost", "BufNewFile" },
   config = function()
     require("todo_lens").setup({
@@ -39,7 +39,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
 use({
-  "Gos/todo-lens.nvim",
+  "gendonholaholo/todo-lens.nvim",
   config = function()
     require("todo_lens").setup()
   end,
@@ -48,7 +48,7 @@ use({
 
 Using [vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
-Plug 'Gos/todo-lens.nvim'
+Plug 'gendonholaholo/todo-lens.nvim'
 ```
 
 ## Usage
