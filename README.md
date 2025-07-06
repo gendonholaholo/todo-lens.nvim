@@ -2,7 +2,7 @@
 
 A lightweight, high-performance Neovim plugin for highlighting and managing TODO-style comments with advanced listing capabilities.
 
-![License](https://img.shields.io/github/license/Gos/todo-lens.nvim)
+![License](https://img.shields.io/github/license/gendonholaholo/todo-lens.nvim)
 ![Neovim version](https://img.shields.io/badge/Neovim-0.7%2B-blueviolet)
 ![Status](https://img.shields.io/badge/status-stable-green)
 
@@ -14,59 +14,72 @@ A lightweight, high-performance Neovim plugin for highlighting and managing TODO
 - **Optimized Performance**: Incremental updates and lazy loading
 - **Highly Configurable**: Custom keywords, colors, and patterns
 - **Low Overhead**: < 1MB memory usage for 50 open buffers
+- **Robust Pattern Matching**: Uses Lua string patterns for maximum compatibility
+- **Priority-based Sorting**: Organize TODOs by importance
 
 ## Installation
 
-Using [lazy.nvim](https://github.com/folke/lazy.nvim):
+### Using [lazy.nvim](https://github.com/folke/lazy.nvim) (Recommended)
 ```lua
 {
-  "Gos/todo-lens.nvim",
+  "gendonholaholo/todo-lens.nvim",
   event = { "BufReadPost", "BufNewFile" },
   config = function()
     require("todo_lens").setup({
-      -- optional custom config
       keywords = {
-        TODO  = { color = "#ff9e64", priority = 10 }, -- hex colors automatically create highlight groups
+        TODO  = { color = "#ff9e64", priority = 10 },
         FIXME = { color = "#e86671", priority = 10 },
         HACK  = { color = "#bb9af7", priority = 5  },
         NOTE  = { color = "#7dcfff", priority = 1  },
-      },
-      -- or use highlight groups
-      keywords = {
-        TODO  = { color = "TodoHighlightTODO", priority = 10 }, -- link to existing highlight group
-        FIXME = { color = "Error", priority = 10 },             -- link to builtin group
-        HACK  = { color = "WarningMsg", priority = 5 },
-        NOTE  = { color = "Comment", priority = 1 },
+        BUG   = { color = "#f7768e", priority = 15 },
+        PERF  = { color = "#9ece6a", priority = 8  },
       },
     })
+    
+    -- Optional keymaps
+    vim.keymap.set("n", "<leader>tl", "<cmd>TodoList<CR>", { desc = "List TODOs" })
+    vim.keymap.set("n", "<leader>tt", "<cmd>TodoToggle<CR>", { desc = "Toggle TODO highlighting" })
+    vim.keymap.set("n", "<leader>tf", "<cmd>TodoTelescope<CR>", { desc = "Find TODOs" })
   end,
 }
 ```
 
-Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
+### Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 ```lua
 use({
-  "Gos/todo-lens.nvim",
+  "gendonholaholo/todo-lens.nvim",
   config = function()
     require("todo_lens").setup()
   end,
 })
 ```
 
-Using [vim-plug](https://github.com/junegunn/vim-plug):
+### Using [vim-plug](https://github.com/junegunn/vim-plug)
 ```vim
-Plug 'Gos/todo-lens.nvim'
+Plug 'gendonholaholo/todo-lens.nvim'
+```
+
+### Local Development/Testing
+```lua
+{
+  dir = "/path/to/your/todo-lens.nvim",
+  name = "todo-lens.nvim",
+  config = function()
+    require("todo_lens").setup()
+  end,
+}
 ```
 
 ## Usage
 
 ### Commands
-- `:TodoList` - Open quickfix window with all TODO items
-- `:TodoToggle` - Toggle comment highlighting
-- `:TodoTelescope` - Open fuzzy finder (requires telescope.nvim)
+- `:TodoList` - Open quickfix window with all TODO items from open buffers
+- `:TodoToggle` - Toggle comment highlighting on/off
+- `:TodoTelescope` - Open fuzzy finder for TODO items (requires telescope.nvim)
 
 ### Default Keymaps
-None by default. Example configuration:
+No default keymaps are set. Add your preferred mappings:
+
 ```lua
 vim.keymap.set("n", "<leader>tl", "<cmd>TodoList<CR>", { desc = "List TODOs" })
 vim.keymap.set("n", "<leader>tt", "<cmd>TodoToggle<CR>", { desc = "Toggle TODO highlighting" })
@@ -75,7 +88,7 @@ vim.keymap.set("n", "<leader>tf", "<cmd>TodoTelescope<CR>", { desc = "Find TODOs
 
 ## Configuration
 
-Full configuration with defaults:
+### Full Configuration with Defaults
 ```lua
 require("todo_lens").setup({
   keywords = {
@@ -85,80 +98,172 @@ require("todo_lens").setup({
     NOTE  = { color = "TodoHighlightNOTE",  priority = 1  },
   },
   colors = {
-    TODO  = "#ff9e64",  -- default colors if no keyword override
-    FIXME = "#e86671",
-    HACK  = "#bb9af7",
-    NOTE  = "#7dcfff",
+    TODO  = "#ff9e64",  -- Orange
+    FIXME = "#e86671",  -- Red
+    HACK  = "#bb9af7",  -- Purple
+    NOTE  = "#7dcfff",  -- Blue
   },
   highlight = {
     keyword = "fg",        -- options: "fg" | "bg" | "none"
-    after_keyword = "comment", -- "comment" to link to Comment group
+    after_keyword = "comment", -- highlight group for text after keyword
   },
 })
 ```
 
-### Custom Keywords
-Add your own keywords with custom colors and priorities:
+### Custom Keywords and Colors
 ```lua
 require("todo_lens").setup({
   keywords = {
-    BUG   = { color = "#ff0000", priority = 20 },  -- hex color
-    PERF  = { color = "Special", priority = 15 },   -- highlight group
-    TEST  = { color = "Function", priority = 5  },  -- highlight group
+    -- Using hex colors (automatically creates highlight groups)
+    BUG   = { color = "#ff0000", priority = 20 },
+    PERF  = { color = "#ffff00", priority = 15 },
+    TEST  = { color = "#00ff00", priority = 5  },
+    
+    -- Using existing highlight groups
+    WARN  = { color = "WarningMsg", priority = 12 },
+    INFO  = { color = "Comment", priority = 3 },
   },
 })
+```
+
+### Pattern Matching
+The plugin detects TODO comments in various formats:
+```lua
+-- TODO: Basic format
+-- FIXME without colon
+-- NOTE:   with extra spaces
+/* HACK: in block comments */
+# TODO: in shell comments
+<!-- FIXME: in HTML comments -->
 ```
 
 ## Advanced Features
 
 ### Telescope Integration
-Requires [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim). Provides:
+Requires [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim):
 - Fuzzy search across all TODO items
 - Live preview of TODO context
 - Quick jump-to-definition
 - Priority-based sorting
 
 ### Quickfix Integration
-Standard Neovim quickfix list populated with:
+Standard Neovim quickfix list with:
 - File path and location
-- Keyword type
-- Full description text
+- Keyword type and description
 - Priority-based sorting
+- Standard navigation (`<Enter>` to jump)
+
+### Which-Key Integration
+Optional integration with [which-key.nvim](https://github.com/folke/which-key.nvim):
+
+```lua
+-- Create separate file: lua/plugins/todo-lens-which-key.lua
+return {
+  {
+    "folke/which-key.nvim",
+    optional = true,
+    opts = function(_, opts)
+      if not opts.spec then
+        opts.spec = {}
+      end
+      
+      table.insert(opts.spec, {
+        { "<leader>t", group = "TODO", icon = "󰗀" },
+        { "<leader>tl", desc = "List TODOs", icon = "󰈙" },
+        { "<leader>tt", desc = "Toggle TODO highlighting", icon = "󰸞" },
+        { "<leader>tf", desc = "Find TODOs", icon = "󰍉" },
+      })
+      
+      return opts
+    end,
+  },
+}
+```
 
 ## Performance
 
 The plugin is optimized for performance:
-- Incremental updates on changed lines
-- Debounced processing during rapid typing
-- Lazy loading of non-critical components
-- Efficient regex pattern caching
-- Memory-conscious data structures
+- **Fast Startup**: Lazy loading with event-based initialization
+- **Efficient Parsing**: Lua string patterns instead of complex regex
+- **Incremental Updates**: Only processes changed content
+- **Memory Conscious**: Minimal memory footprint
+- **Debounced Processing**: Prevents excessive updates during rapid typing
+
+## Troubleshooting
+
+### Plugin Not Loading
+1. Check `:Lazy` status (if using lazy.nvim)
+2. Verify plugin path in configuration
+3. Restart Neovim: `:Lazy reload todo-lens.nvim`
+
+### No Highlighting Visible
+1. Check if highlighting is enabled: `:TodoToggle`
+2. Verify TODO comments exist in current buffer
+3. Check error messages: `:messages`
+
+### Commands Not Available
+1. Verify plugin setup: `:lua print(vim.inspect(require("todo_lens")))`
+2. Check for configuration errors
+3. Ensure plugin loaded properly
+
+### Which-Key Warnings
+The plugin works without which-key. If you see warnings:
+1. Remove which-key integration from plugin config
+2. Use separate which-key configuration file (see above)
+3. Check `:checkhealth which-key`
 
 ## Development
 
 ### Running Tests
 ```bash
-# Using Plenary test runner
-nvim --headless -c "PlenaryBustedDirectory tests {minimal_init = './tests/minimal_init.lua'}"
+# Install dependencies
+make install
 
-# Or using busted directly
-busted --lua=./tests/minimal_init.lua tests
+# Run tests
+make test
+
+# Format code
+make format
+
+# Check formatting
+make lint
+
+# Run all CI tasks
+make ci
 ```
 
-### Architecture
-- Modular design with clear separation of concerns
-- Event-driven updates via Neovim autocmds
-- Configuration-driven behavior
-- Comprehensive error handling
+### Project Structure
+```
+├── lua/
+│   ├── todo_highlight/          # Main plugin modules
+│   │   ├── init.lua            # Plugin entry point
+│   │   ├── config.lua          # Configuration management
+│   │   ├── parser.lua          # TODO parsing logic
+│   │   ├── highlighter.lua     # Highlighting functionality
+│   │   ├── quickfix.lua        # Quickfix integration
+│   │   └── telescope.lua       # Telescope integration
+│   └── todo_lens/
+│       └── init.lua            # Alias for backward compatibility
+├── plugin/                     # Vim plugin files
+├── tests/                      # Test suite
+├── doc/                        # Documentation
+└── .github/workflows/          # CI/CD
+```
 
 ## Requirements
 
-- Neovim >= 0.7.0
-- Optional: telescope.nvim for fuzzy finding
+- **Neovim >= 0.7.0**
+- **Optional**: [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) for fuzzy finding
+- **Optional**: [which-key.nvim](https://github.com/folke/which-key.nvim) for key descriptions
 
 ## Contributing
 
-Contributions are welcome! Please check our [Contributing Guidelines](CONTRIBUTING.md).
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Run `make ci` to ensure all checks pass
+6. Submit a pull request
 
 ## License
 
@@ -166,6 +271,10 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-- Inspired by various TODO highlighting solutions
+- Inspired by various TODO highlighting solutions in the Neovim ecosystem
 - Built with Neovim's powerful Lua API
-- Thanks to all contributors! 
+- Thanks to all contributors and testers
+
+---
+
+**Ready to try it out?** Clone the repository and follow the installation instructions above! 
