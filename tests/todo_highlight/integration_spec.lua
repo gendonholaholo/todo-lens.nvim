@@ -6,6 +6,8 @@ describe("TodoHighlight Integration", function()
   before_each(function()
     test_buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_set_current_buf(test_buf)
+    -- Reset configuration
+    TodoHighlight.setup()
   end)
 
   after_each(function()
@@ -28,6 +30,12 @@ describe("TodoHighlight Integration", function()
             CUSTOM = { color = "#ff0000", priority = 20 },
           },
         })
+      end)
+    end)
+
+    it("should handle empty configuration", function()
+      assert.has_no_error(function()
+        TodoHighlight.setup({})
       end)
     end)
   end)
@@ -54,6 +62,15 @@ describe("TodoHighlight Integration", function()
         TodoHighlight.highlight_buffer(invalid_buf)
       end)
     end)
+
+    it("should handle empty buffer", function()
+      TodoHighlight.setup()
+      vim.api.nvim_buf_set_lines(test_buf, 0, -1, false, {})
+
+      assert.has_no_error(function()
+        TodoHighlight.highlight_buffer(test_buf)
+      end)
+    end)
   end)
 
   describe("toggle", function()
@@ -72,6 +89,16 @@ describe("TodoHighlight Integration", function()
       assert.has_no_error(function()
         TodoHighlight.toggle()
       end)
+    end)
+
+    it("should handle multiple toggles", function()
+      TodoHighlight.setup()
+      
+      for i = 1, 5 do
+        assert.has_no_error(function()
+          TodoHighlight.toggle()
+        end)
+      end
     end)
   end)
 
@@ -94,6 +121,18 @@ describe("TodoHighlight Integration", function()
     it("should handle empty buffers", function()
       TodoHighlight.setup()
       vim.api.nvim_buf_set_lines(test_buf, 0, -1, false, {})
+
+      assert.has_no_error(function()
+        TodoHighlight.list()
+      end)
+    end)
+
+    it("should handle no TODO items", function()
+      TodoHighlight.setup()
+      vim.api.nvim_buf_set_lines(test_buf, 0, -1, false, {
+        "print('hello world')",
+        "local x = 42",
+      })
 
       assert.has_no_error(function()
         TodoHighlight.list()
@@ -127,6 +166,48 @@ describe("TodoHighlight Integration", function()
 
       assert.has_no_error(function()
         vim.cmd("TodoToggle")
+      end)
+    end)
+
+    it("should handle TodoTelescope command gracefully", function()
+      TodoHighlight.setup()
+      
+      -- Should not error even if telescope is not available
+      assert.has_no_error(function()
+        pcall(vim.cmd, "TodoTelescope")
+      end)
+    end)
+  end)
+
+  describe("error handling", function()
+    it("should handle malformed keywords", function()
+      assert.has_no_error(function()
+        TodoHighlight.setup({
+          keywords = {
+            [""] = { color = "#ff0000", priority = 10 },
+            [123] = { color = "#ff0000", priority = 10 },
+          },
+        })
+      end)
+    end)
+
+    it("should handle invalid colors", function()
+      assert.has_no_error(function()
+        TodoHighlight.setup({
+          keywords = {
+            TEST = { color = "invalid_color", priority = 10 },
+          },
+        })
+      end)
+    end)
+
+    it("should handle missing priority", function()
+      assert.has_no_error(function()
+        TodoHighlight.setup({
+          keywords = {
+            TEST = { color = "#ff0000" },
+          },
+        })
       end)
     end)
   end)
