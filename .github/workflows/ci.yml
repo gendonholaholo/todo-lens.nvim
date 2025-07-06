@@ -35,6 +35,10 @@ jobs:
         luarocks install busted
         luarocks install luacov
         luarocks install luassert
+        luarocks install vusted
+
+    - name: Add Luarocks bin to PATH
+      run: echo "${HOME}/.luarocks/bin" >> $GITHUB_PATH
 
     - name: Setup test environment
       run: |
@@ -48,12 +52,12 @@ jobs:
         export XDG_CONFIG_HOME="$HOME/.config"
         export XDG_CACHE_HOME="$HOME/.cache"
 
-    - name: Run tests
+    - name: Run tests with vusted
       run: |
         export XDG_DATA_HOME="$HOME/.local/share"
         export XDG_CONFIG_HOME="$HOME/.config"
         export XDG_CACHE_HOME="$HOME/.cache"
-        busted --verbose --output=gtest
+        vusted -u tests/minimal_init.lua tests
       continue-on-error: false
 
     - name: Upload test results
