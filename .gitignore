@@ -1,0 +1,62 @@
+# Lua
+*.o
+*.so
+*.dll
+*.dylib
+luac.out
+
+# Neovim
+.netrwhist
+**/spell/
+.vim-src/
+doc/tags
+doc/tags-??
+
+# Test and coverage
+.luacov
+luacov.*
+.coverage/
+coverage.info
+
+# Development tools
+.ccls-cache/
+.clang-format
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+tmp/
+.tests/
+.dev/
+.scratch/
+
+# Package managers
+.rocks/
+luarocks/
+.luarocks/
+
+# Build artifacts
+build/
+dist/
+*.rock
+
+# Local development
+local.vim
+.local.vim
+.envrc
+.env
+.direnv/ 
+
+docs/
